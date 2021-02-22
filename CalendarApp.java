@@ -4,16 +4,18 @@
  * CalendarApp application
  *
  * @author Michael Finnegan
- * @version 1.00 2021/2/21
+ * @version 1.01 2021/2/22
  */
 import java.time.LocalDateTime;  
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.awt.*;
+import java.awt.print.*;
+import javax.print.attribute.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-  
+import java.util.concurrent.TimeUnit;
 
 /*----------------------------------------------------------------
  * Calendar is not the main class. 
@@ -560,17 +562,42 @@ public class CalendarApp extends JFrame implements ActionListener {
 
         if (e.getSource() == btn1) {
           
-            // call a method
+            // Display the calendar in the textArea
             String yearS = textField1.getText();
             calendar = new Calendar(yearS);
             textArea.setText(calendar.GetNotepadText());
             this.setTitle("Calendar " + calendar.getYear());
 
         } else if (e.getSource() == btn2) {
-            // call another method
-            JLabel label = new JLabel("This feature is not developed in this version.");         
-			label.setFont(new Font("Arial", Font.BOLD, 20));
-            JOptionPane.showMessageDialog(null, label, "Information", JOptionPane.INFORMATION_MESSAGE);
+            // Print out the calendar on paper.
+            PrintRequestAttributeSet printAttributes = new javax.print.attribute.HashPrintRequestAttributeSet ();
+			printAttributes.add(javax.print.attribute.standard.OrientationRequested.LANDSCAPE);
+            
+            JTextArea textArea2 = new JTextArea();
+            textArea2.setFont(new Font("Lucida Console", Font.BOLD, 9));
+            textArea2.setText(calendar.GetNotepadText());
+            JLabel label = new JLabel(); 
+            label.setFont(new Font("Arial", Font.BOLD, 20));
+            
+	         try{
+	         	boolean isCompleted = textArea2.print(null, null, true, null, printAttributes, true);
+				try{
+					TimeUnit.SECONDS.sleep(10);
+				} catch(Exception et){
+					
+				}
+				if(isCompleted){
+					label.setText("Finished printing");
+					JOptionPane.showMessageDialog(null, label, "Information", JOptionPane.INFORMATION_MESSAGE);
+				}else {
+					label.setText("Printing in progress...");
+					JOptionPane.showMessageDialog(null, label, "Information", JOptionPane.INFORMATION_MESSAGE);
+				}
+			} catch(PrinterException pex) {
+				label.setText(pex.getStackTrace().toString());
+				JOptionPane.showMessageDialog(null, label, "Information", JOptionPane.ERROR_MESSAGE);
+			}
+
         }
 
     }
